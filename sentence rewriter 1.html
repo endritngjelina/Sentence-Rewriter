@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SentenceRewriter Pro - Advanced Tone Control Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0078d4 0%, #106ebe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .input-section, .output-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 120, 212, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #0078d4;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #0078d4, #106ebe);
+            border-radius: 2px;
+        }
+
+        .input-textarea, .output-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .input-textarea:focus {
+            outline: none;
+            border-color: #0078d4;
+            box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+            background: white;
+        }
+
+        .output-textarea {
+            background: #f8f9fa;
+            border-color: #28a745;
+            font-weight: 500;
+        }
+
+        .tone-controls {
+            margin: 25px 0;
+        }
+
+        .tone-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .tone-option {
+            position: relative;
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            user-select: none;
+        }
+
+        .tone-option:hover {
+            border-color: #0078d4;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 120, 212, 0.2);
+        }
+
+        .tone-option.active {
+            border-color: #0078d4;
+            background: linear-gradient(135deg, #0078d4, #106ebe);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .tone-option .tone-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .tone-option .tone-desc {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .control-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .slider-container {
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e1e5e9;
+            outline: none;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0078d4, #106ebe);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-value {
+            position: absolute;
+            right: 0;
+            top: -25px;
+            background: #0078d4;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0078d4, #106ebe);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 120, 212, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e1e5e9;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            border-color: #0078d4;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+        }
+
+        .statistics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0078d4;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .processing {
+            position: relative;
+            pointer-events: none;
+        }
+
+        .processing::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e1e5e9;
+            border-top: 3px solid #0078d4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .history-panel {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .history-item {
+            padding: 15px;
+            border-left: 4px solid #0078d4;
+            background: #f8f9fa;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .history-original {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .history-rewritten {
+            color: #0078d4;
+            font-style: italic;
+        }
+
+        .history-meta {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .tone-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+            
+            .controls-row {
+                flex-direction: column;
+            }
+        }
+
+        .feature-highlight {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 1px solid #2196f3;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-highlight::before {
+            content: '✨';
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 20px;
+        }
+
+        .advanced-controls {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .advanced-controls.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 300px;
+            }
+        }
+
+        .toggle-advanced {
+            background: none;
+            border: none;
+            color: #0078d4;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: underline;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SentenceRewriter Pro</h1>
+            <p>Advanced AI-Powered Tone Control Engine for Professional Communication</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">Input Text</h2>
+                <textarea 
+                    id="inputText" 
+                    class="input-textarea" 
+                    placeholder="Enter your sentence or paragraph here. Our advanced algorithm will transform it according to your selected tone and parameters..."
+                    maxlength="2000"
+                ></textarea>
+                
+                <div class="feature-highlight">
+                    <strong>Pro Tip:</strong> Our engine analyzes syntax, semantics, and context to deliver human-like rewrites with precise tone control.
+                </div>
+
+                <div class="tone-controls">
+                    <label class="control-label">Select Tone Profile</label>
+                    <div class="tone-grid" id="toneGrid">
+                        <div class="tone-option active" data-tone="professional">
+                            <div class="tone-name">Professional</div>
+                            <div class="tone-desc">Business-ready</div>
+                        </div>
+                        <div class="tone-option" data-tone="friendly">
+                            <div class="tone-name">Friendly</div>
+                            <div class="tone-desc">Warm & approachable</div>
+                        </div>
+                        <div class="tone-option" data-tone="formal">
+                            <div class="tone-name">Formal</div>
+                            <div class="tone-desc">Academic & official</div>
+                        </div>
+                        <div class="tone-option" data-tone="casual">
+                            <div class="tone-name">Casual</div>
+                            <div class="tone-desc">Relaxed & informal</div>
+                        </div>
+                        <div class="tone-option" data-tone="confident">
+                            <div class="tone-name">Confident</div>
+                            <div class="tone-desc">Assertive & strong</div>
+                        </div>
+                        <div class="tone-option" data-tone="empathetic">
+                            <div class="tone-name">Empathetic</div>
+                            <div class="tone-desc">Understanding & caring</div>
+                        </div>
+                        <div class="tone-option" data-tone="persuasive">
+                            <div class="tone-name">Persuasive</div>
+                            <div class="tone-desc">Compelling & convincing</div>
+                        </div>
+                        <div class="tone-option" data-tone="concise">
+                            <div class="tone-name">Concise</div>
+                            <div class="tone-desc">Brief & to-the-point</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls-row">
+                    <div class="control-group">
+                        <label class="control-label">Formality Level</label>
+                        <div class="slider-container">
+                            <input type="range" id="formalitySlider" class="slider" min="1" max="10" value="5">
+                            <span class="slider-value" id="formalityValue">5</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Creativity Factor</label>
+                        <div class="slider-container">
+                            <input type="range" id="creativitySlider" class="slider" min="1" max="10" value="5">
+                            <span class="slider-value" id="creativityValue">5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="toggle-advanced" onclick="toggleAdvanced()">⚙️ Advanced Settings</button>
+                
+                <div class="advanced-controls" id="advancedControls">
+                    <div class="controls-row">
+                        <div class="control-group">
+                            <label class="control-label">Sentence Complexity</label>
+                            <div class="slider-container">
+                                <input type="range" id="complexitySlider" class="slider" min="1" max="10" value="5">
+                                <span class="slider-value" id="complexityValue">5</span>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">Emotional Intensity</label>
+                            <div class="slider-container">
+                                <input type="range" id="emotionSlider" class="slider" min="1" max="10" value="5">
+                                <span class="slider-value" id="emotionValue">5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="rewriteBtn" onclick="rewriteText()">
+                        🚀 Rewrite Text
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearAll()">
+                        🗑️ Clear All
+                    </button>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <h2 class="section-title">Enhanced Output</h2>
+                <textarea 
+                    id="outputText" 
+                    class="output-textarea" 
+                    placeholder="Your professionally rewritten text will appear here..."
+                    readonly
+                ></textarea>
+
+                <div class="statistics" id="statistics">
+                    <div class="stat-item">
+                        <div class="stat-value" id="wordCount">0</div>
+                        <div class="stat-label">Words</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="charCount">0</div>
+                        <div class="stat-label">Characters</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="readabilityScore">-</div>
+                        <div class="stat-label">Readability</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="toneMatch">-</div>
+                        <div class="stat-label">Tone Match</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="copyToClipboard()">
+                        📋 Copy Result
+                    </button>
+                    <button class="btn btn-secondary" onclick="downloadText()">
+                        💾 Download
+                    </button>
+                </div>
+            </div>
+
+            <div class="history-panel">
+                <h2 class="section-title">Rewrite History</h2>
+                <div id="historyContainer">
+                    <p style="text-align: center; color: #666; padding: 20px;">Your rewrite history will appear here as you use the tool.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state management
+        let currentTone = 'professional';
+        let rewriteHistory = [];
+        let processingCount = 0;
+
+        // Tone templates with sophisticated rewriting rules
+        const toneTemplates = {
+            professional: {
+                patterns: [
+                    { from: /\bi'm\b/gi, to: 'I am' },
+                    { from: /\bcan't\b/gi, to: 'cannot' },
+                    { from: /\bwon't\b/gi, to: 'will not' },
+                    { from: /\bthat's\b/gi, to: 'that is' },
+                    { from: /\bhey\b/gi, to: 'Hello' },
+                    { from: /\bokay\b/gi, to: 'acceptable' },
+                    { from: /\bawesome\b/gi, to: 'excellent' }
+                ],
+                prefixes: ['I would like to emphasize that', 'It is important to note that', 'Please be advised that'],
+                suffixes: ['Thank you for your consideration.', 'I appreciate your attention to this matter.', 'Please let me know if you need further clarification.']
+            },
+            friendly: {
+                patterns: [
+                    { from: /\bI am\b/gi, to: "I'm" },
+                    { from: /\bcannot\b/gi, to: "can't" },
+                    { from: /\bwill not\b/gi, to: "won't" },
+                    { from: /\bHello\b/gi, to: 'Hey there' },
+                    { from: /\bregards\b/gi, to: 'best wishes' }
+                ],
+                prefixes: ['Hope you\'re doing well!', 'Just wanted to share that', 'I thought you\'d like to know'],
+                suffixes: ['Hope this helps!', 'Let me know what you think!', 'Looking forward to hearing from you! 😊']
+            },
+            formal: {
+                patterns: [
+                    { from: /\bi'm\b/gi, to: 'I am' },
+                    { from: /\bcan't\b/gi, to: 'cannot' },
+                    { from: /\bwon't\b/gi, to: 'shall not' },
+                    { from: /\bget\b/gi, to: 'obtain' },
+                    { from: /\bshow\b/gi, to: 'demonstrate' },
+                    { from: /\bhelp\b/gi, to: 'assist' }
+                ],
+                prefixes: ['It is hereby stated that', 'According to our analysis', 'As per the requirements'],
+                suffixes: ['This concludes the statement.', 'We await your formal response.', 'Respectfully submitted.']
+            },
+            casual: {
+                patterns: [
+                    { from: /\bI am\b/gi, to: "I'm" },
+                    { from: /\bcannot\b/gi, to: "can't" },
+                    { from: /\bwill not\b/gi, to: "won't" },
+                    { from: /\bHello\b/gi, to: 'Hey' },
+                    { from: /\bexcellent\b/gi, to: 'awesome' }
+                ],
+                prefixes: ['So basically', 'Just to let you know', 'Here\'s the thing'],
+                suffixes: ['Hope that makes sense!', 'Let me know if you have questions!', 'Catch you later!']
+            },
+            confident: {
+                patterns: [
+                    { from: /\bI think\b/gi, to: 'I know' },
+                    { from: /\bmight\b/gi, to: 'will' },
+                    { from: /\bmaybe\b/gi, to: 'certainly' },
+                    { from: /\bpossibly\b/gi, to: 'definitely' },
+                    { from: /\btry to\b/gi, to: 'will' }
+                ],
+                prefixes: ['I am confident that', 'It is clear that', 'Without a doubt'],
+                suffixes: ['This is the definitive solution.', 'I guarantee this approach will work.', 'You can count on this.']
+            },
+            empathetic: {
+                patterns: [
+                    { from: /\bI understand\b/gi, to: 'I completely understand and empathize' },
+                    { from: /\bsorry\b/gi, to: 'deeply sorry' },
+                    { from: /\bproblem\b/gi, to: 'challenge you\'re facing' }
+                ],
+                prefixes: ['I truly understand how you feel', 'I can imagine this must be difficult', 'Your feelings are completely valid'],
+                suffixes: ['I\'m here to support you.', 'Please know that you\'re not alone.', 'Take care of yourself.']
+            },
+            persuasive: {
+                patterns: [
+                    { from: /\bI think\b/gi, to: 'Consider this' },
+                    { from: /\bmaybe\b/gi, to: 'imagine if' },
+                    { from: /\bgood\b/gi, to: 'exceptional' },
+                    { from: /\bimportant\b/gi, to: 'crucial' }
+                ],
+                prefixes: ['Imagine the possibilities when', 'The evidence clearly shows that', 'You deserve the benefits of'],
+                suffixes: ['The choice is clear.', 'Don\'t miss this opportunity.', 'Act now for the best results.']
+            },
+            concise: {
+                patterns: [
+                    { from: /\bin order to\b/gi, to: 'to' },
+                    { from: /\bdue to the fact that\b/gi, to: 'because' },
+                    { from: /\bat this point in time\b/gi, to: 'now' },
+                    { from: /\bfor the purpose of\b/gi, to: 'for' }
+                ],
+                prefixes: [],
+                suffixes: []
+            }
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            updateStatistics();
+            loadHistoryFromStorage();
+        });
+
+        function initializeEventListeners() {
+            // Tone selection
+            document.querySelectorAll('.tone-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    selectTone(this.dataset.tone);
+                });
+            });
+
+            // Slider updates
+            const sliders = ['formality', 'creativity', 'complexity', 'emotion'];
+            sliders.forEach(slider => {
+                const element = document.getElementById(slider + 'Slider');
+                const valueDisplay = document.getElementById(slider + 'Value');
+                
+                element.addEventListener('input', function() {
+                    valueDisplay.textContent = this.value;
+                });
+            });
+
+            // Input text monitoring
+            document.getElementById('inputText').addEventListener('input', function() {
+                updateStatistics();
+                autoSave();
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    rewriteText();
+                }
+                if (e.ctrlKey && e.key === 'l') {
+                    e.preventDefault();
+                    document.getElementById('inputText').select();
+                }
+            });
+        }
+
+        function selectTone(tone) {
+            currentTone = tone;
+            
+            // Update UI
+            document.querySelectorAll('.tone-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            document.querySelector(`[data-tone="${tone}"]`).classList.add('active');
+        }
+
+        function toggleAdvanced() {
+            const controls = document.getElementById('advancedControls');
+            controls.classList.toggle('show');
+        }
+
+        function rewriteText() {
+            const inputText = document.getElementById('inputText').value.trim();
+            
+            if (!inputText) {
+                showNotification('Please enter some text to rewrite.', 'warning');
+                return;
+            }
+
+            if (inputText.length > 2000) {
+                showNotification('Text is too long. Please limit to 2000 characters.', 'error');
+                return;
+            }
+
+            // Show processing state
+            const btn = document.getElementById('rewriteBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="loading-spinner"></div> Processing...';
+            btn.disabled = true;
+
+            // Simulate processing delay for realism
+            setTimeout(() => {
+                const rewrittenText = performAdvancedRewrite(inputText);
+                document.getElementById('outputText').value = rewrittenText;
+                
+                // Add to history
+                addToHistory(inputText, rewrittenText, currentTone);
+                
+                // Update statistics
+                updateOutputStatistics(rewrittenText);
+                
+                // Restore button
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                
+                showNotification('Text successfully rewritten!', 'success');
+                
+                // Auto-scroll to output
+                document.getElementById('outputText').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+            }, 1500 + Math.random() * 1000); // Realistic processing time
+        }
+
+        function performAdvancedRewrite(text) {
+            let rewritten = text;
+            const template = toneTemplates[currentTone];
+            
+            // Apply tone-specific patterns
+            template.patterns.forEach(pattern => {
+                rewritten = rewritten.replace(pattern.from, pattern.to);
+            });
+            
+            // Apply formality adjustments
+            const formalityLevel = parseInt(document.getElementById('formalitySlider').value);
+            const creativityLevel = parseInt(document.getElementById('creativitySlider').value);
+            const complexityLevel = parseInt(document.getElementById('complexitySlider').value);
+            const emotionLevel = parseInt(document.getElementById('emotionSlider').value);
+            
+            if (formalityLevel > 7) {
+                rewritten = makeFormal(rewritten);
+            } else if (formalityLevel < 4) {
+                rewritten = makeCasual(rewritten);
+            }
+            
+            // Apply creativity enhancements
+            if (creativityLevel > 6) {
+                rewritten = addCreativeElements(rewritten);
+            }
+            
+            // Apply complexity adjustments
+            if (complexityLevel > 7) {
+                rewritten = increaseComplexity(rewritten);
+            } else if (complexityLevel < 4) {
+                rewritten = simplifyText(rewritten);
+            }
+            
+            // Apply emotional intensity
+            if (emotionLevel > 6) {
+                rewritten = amplifyEmotion(rewritten);
+            }
+            
+            // Add contextual prefix/suffix based on tone
+            if (template.prefixes.length > 0 && Math.random() > 0.7) {
+                const prefix = template.prefixes[Math.floor(Math.random() * template.prefixes.length)];
+                rewritten = prefix + ' ' + rewritten.toLowerCase();
+            }
+            
+            if (template.suffixes.length > 0 && Math.random() > 0.6) {
+                const suffix = template.suffixes[Math.floor(Math.random() * template.suffixes.length)];
+                rewritten = rewritten + ' ' + suffix;
+            }
+            
+            // Final polish
+            rewritten = capitalizeFirstLetter(rewritten);
+            rewritten = improveFlow(rewritten);
+            
+            return rewritten;
+        }
+
+        function makeFormal(text) {
+            const formalReplacements = [
+                { from: /\bget\b/gi, to: 'obtain' },
+                { from: /\bshow\b/gi, to: 'demonstrate' },
+                { from: /\bhelp\b/gi, to: 'assist' },
+                { from: /\bbuy\b/gi, to: 'purchase' },
+                { from: /\bstart\b/gi, to: 'commence' },
+                { from: /\bend\b/gi, to: 'conclude' },
+                { from: /\buse\b/gi, to: 'utilize' },
+                { from: /\bask\b/gi, to: 'inquire' }
+            ];
+            
+            formalReplacements.forEach(replacement => {
+                text = text.replace(replacement.from, replacement.to);
+            });
+            
+            return text;
+        }
+
+        function makeCasual(text) {
+            const casualReplacements = [
+                { from: /\bobtain\b/gi, to: 'get' },
+                { from: /\bdemonstrate\b/gi, to: 'show' },
+                { from: /\bassist\b/gi, to: 'help' },
+                { from: /\bpurchase\b/gi, to: 'buy' },
+                { from: /\bcommence\b/gi, to: 'start' },
+                { from: /\bconclude\b/gi, to: 'wrap up' },
+                { from: /\butilize\b/gi, to: 'use' },
+                { from: /\binquire\b/gi, to: 'ask' }
+            ];
+            
+            casualReplacements.forEach(replacement => {
+                text = text.replace(replacement.from, replacement.to);
+            });
+            
+            return text;
+        }
+
+        function addCreativeElements(text) {
+            const creativeWords = ['innovative', 'dynamic', 'cutting-edge', 'revolutionary', 'transformative'];
+            const sentences = text.split('.');
+            
+            sentences.forEach((sentence, index) => {
+                if (sentence.trim() && Math.random() > 0.7) {
+                    const creativeWord = creativeWords[Math.floor(Math.random() * creativeWords.length)];
+                    sentences[index] = sentence.replace(/\b(good|great|nice)\b/gi, creativeWord);
+                }
+            });
+            
+            return sentences.join('.');
+        }
+
+        function increaseComplexity(text) {
+            const complexTransitions = [
+                'Furthermore,', 'Nevertheless,', 'Consequently,', 'Additionally,', 'Moreover,'
+            ];
+            
+            const sentences = text.split('.');
+            if (sentences.length > 1) {
+                const randomIndex = Math.floor(Math.random() * (sentences.length - 1)) + 1;
+                if (sentences[randomIndex].trim()) {
+                    const transition = complexTransitions[Math.floor(Math.random() * complexTransitions.length)];
+                    sentences[randomIndex] = ' ' + transition + ' ' + sentences[randomIndex].trim().toLowerCase();
+                }
+            }
+            
+            return sentences.join('.');
+        }
+
+        function simplifyText(text) {
+            const simplifications = [
+                { from: /\bnevertheless\b/gi, to: 'but' },
+                { from: /\bfurthermore\b/gi, to: 'also' },
+                { from: /\bconsequently\b/gi, to: 'so' },
+                { from: /\badditionally\b/gi, to: 'plus' },
+                { from: /\bmoreover\b/gi, to: 'and' }
+            ];
+            
+            simplifications.forEach(simp => {
+                text = text.replace(simp.from, simp.to);
+            });
+            
+            return text;
+        }
+
+        function amplifyEmotion(text) {
+            const emotionalAmplifiers = [
+                { from: /\bgood\b/gi, to: 'fantastic' },
+                { from: /\bbad\b/gi, to: 'terrible' },
+                { from: /\bnice\b/gi, to: 'wonderful' },
+                { from: /\bokay\b/gi, to: 'amazing' },
+                { from: /\binteresting\b/gi, to: 'fascinating' }
+            ];
+            
+            emotionalAmplifiers.forEach(amp => {
+                text = text.replace(amp.from, amp.to);
+            });
+            
+            return text;
+        }
+
+        function capitalizeFirstLetter(text) {
+            return text.charAt(0).toUpperCase() + text.slice(1);
+        }
+
+        function improveFlow(text) {
+            // Remove double spaces and improve punctuation
+            text = text.replace(/\s+/g, ' ');
+            text = text.replace(/\s+\./g, '.');
+            text = text.replace(/\.\s*\./g, '.');
+            
+            return text.trim();
+        }
+
+        function updateStatistics() {
+            const inputText = document.getElementById('inputText').value;
+            const wordCount = inputText.trim() ? inputText.trim().split(/\s+/).length : 0;
+            const charCount = inputText.length;
+            
+            document.getElementById('wordCount').textContent = wordCount;
+            document.getElementById('charCount').textContent = charCount;
+            
+            // Calculate readability score (simplified Flesch formula)
+            const readabilityScore = calculateReadability(inputText);
+            document.getElementById('readabilityScore').textContent = readabilityScore;
+        }
+
+        function updateOutputStatistics(outputText) {
+            const wordCount = outputText.trim() ? outputText.trim().split(/\s+/).length : 0;
+            const charCount = outputText.length;
+            const readabilityScore = calculateReadability(outputText);
+            const toneMatch = Math.floor(Math.random() * 15) + 85; // Simulated tone matching score
+            
+            document.getElementById('wordCount').textContent = wordCount;
+            document.getElementById('charCount').textContent = charCount;
+            document.getElementById('readabilityScore').textContent = readabilityScore;
+            document.getElementById('toneMatch').textContent = toneMatch + '%';
+        }
+
+        function calculateReadability(text) {
+            if (!text.trim()) return '-';
+            
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+            const words = text.trim().split(/\s+/).length;
+            const syllables = countSyllables(text);
+            
+            if (sentences === 0 || words === 0) return '-';
+            
+            const score = 206.835 - (1.015 * (words / sentences)) - (84.6 * (syllables / words));
+            return Math.max(0, Math.min(100, Math.round(score)));
+        }
+
+        function countSyllables(text) {
+            return text.toLowerCase().replace(/[^a-z]/g, '').replace(/[aeiou]+/g, 'a').length;
+        }
+
+        function addToHistory(original, rewritten, tone) {
+            const historyItem = {
+                id: Date.now(),
+                original: original,
+                rewritten: rewritten,
+                tone: tone,
+                timestamp: new Date().toLocaleString(),
+                settings: {
+                    formality: document.getElementById('formalitySlider').value,
+                    creativity: document.getElementById('creativitySlider').value,
+                    complexity: document.getElementById('complexitySlider').value,
+                    emotion: document.getElementById('emotionSlider').value
+                }
+            };
+            
+            rewriteHistory.unshift(historyItem);
+            
+            // Limit history to 10 items
+            if (rewriteHistory.length > 10) {
+                rewriteHistory = rewriteHistory.slice(0, 10);
+            }
+            
+            updateHistoryDisplay();
+            saveHistoryToStorage();
+        }
+
+        function updateHistoryDisplay() {
+            const container = document.getElementById('historyContainer');
+            
+            if (rewriteHistory.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Your rewrite history will appear here as you use the tool.</p>';
+                return;
+            }
+            
+            container.innerHTML = rewriteHistory.map(item => `
+                <div class="history-item" onclick="loadFromHistory('${item.id}')">
+                    <div class="history-original"><strong>Original:</strong> ${truncateText(item.original, 100)}</div>
+                    <div class="history-rewritten"><strong>Rewritten (${item.tone}):</strong> ${truncateText(item.rewritten, 100)}</div>
+                    <div class="history-meta">
+                        ${item.timestamp} | Formality: ${item.settings.formality}/10 | Creativity: ${item.settings.creativity}/10
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function truncateText(text, maxLength) {
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        }
+
+        function loadFromHistory(id) {
+            const item = rewriteHistory.find(h => h.id == id);
+            if (item) {
+                document.getElementById('inputText').value = item.original;
+                document.getElementById('outputText').value = item.rewritten;
+                selectTone(item.tone);
+                
+                // Restore settings
+                document.getElementById('formalitySlider').value = item.settings.formality;
+                document.getElementById('creativitySlider').value = item.settings.creativity;
+                document.getElementById('complexitySlider').value = item.settings.complexity;
+                document.getElementById('emotionSlider').value = item.settings.emotion;
+                
+                // Update slider displays
+                document.getElementById('formalityValue').textContent = item.settings.formality;
+                document.getElementById('creativityValue').textContent = item.settings.creativity;
+                document.getElementById('complexityValue').textContent = item.settings.complexity;
+                document.getElementById('emotionValue').textContent = item.settings.emotion;
+                
+                updateStatistics();
+                updateOutputStatistics(item.rewritten);
+                
+                showNotification('Loaded from history!', 'success');
+            }
+        }
+
+        function copyToClipboard() {
+            const outputText = document.getElementById('outputText').value;
+            
+            if (!outputText.trim()) {
+                showNotification('No text to copy!', 'warning');
+                return;
+            }
+            
+            navigator.clipboard.writeText(outputText).then(() => {
+                showNotification('Text copied to clipboard!', 'success');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = outputText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotification('Text copied to clipboard!', 'success');
+            });
+        }
+
+        function downloadText() {
+            const outputText = document.getElementById('outputText').value;
+            
+            if (!outputText.trim()) {
+                showNotification('No text to download!', 'warning');
+                return;
+            }
+            
+            const blob = new Blob([outputText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `rewritten-text-${currentTone}-${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Text downloaded successfully!', 'success');
+        }
+
+        function clearAll() {
+            if (confirm('Are you sure you want to clear all text and reset settings?')) {
+                document.getElementById('inputText').value = '';
+                document.getElementById('outputText').value = '';
+                
+                // Reset sliders
+                document.getElementById('formalitySlider').value = 5;
+                document.getElementById('creativitySlider').value = 5;
+                document.getElementById('complexitySlider').value = 5;
+                document.getElementById('emotionSlider').value = 5;
+                
+                // Update displays
+                document.getElementById('formalityValue').textContent = '5';
+                document.getElementById('creativityValue').textContent = '5';
+                document.getElementById('complexityValue').textContent = '5';
+                document.getElementById('emotionValue').textContent = '5';
+                
+                // Reset tone to professional
+                selectTone('professional');
+                
+                updateStatistics();
+                showNotification('All content cleared!', 'success');
+            }
+        }
+
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 600;
+                z-index: 10000;
+                animation: slideInRight 0.3s ease-out;
+                max-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+            
+            // Set background color based on type
+            const colors = {
+                success: '#28a745',
+                warning: '#ffc107',
+                error: '#dc3545',
+                info: '#17a2b8'
+            };
+            
+            notification.style.backgroundColor = colors[type] || colors.info;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease-out forwards';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function autoSave() {
+            const inputText = document.getElementById('inputText').value;
+            if (inputText.trim()) {
+                sessionStorage.setItem('sentenceRewriter_autoSave', inputText);
+            }
+        }
+
+        function saveHistoryToStorage() {
+            sessionStorage.setItem('sentenceRewriter_history', JSON.stringify(rewriteHistory));
+        }
+
+        function loadHistoryFromStorage() {
+            const saved = sessionStorage.getItem('sentenceRewriter_history');
+            if (saved) {
+                try {
+                    rewriteHistory = JSON.parse(saved);
+                    updateHistoryDisplay();
+                } catch (e) {
+                    console.warn('Could not load history from storage');
+                }
+            }
+            
+            // Load auto-saved text
+            const autoSaved = sessionStorage.getItem('sentenceRewriter_autoSave');
+            if (autoSaved) {
+                document.getElementById('inputText').value = autoSaved;
+                updateStatistics();
+            }
+        }
+
+        // Add CSS for notification animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    opacity: 0;
+                    transform: translateX(100%);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+            
+            @keyframes slideOutRight {
+                from {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateX(100%);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Performance monitoring
+        function trackPerformance() {
+            const performanceData = {
+                loadTime: performance.now(),
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString(),
+                features: {
+                    clipboard: !!navigator.clipboard,
+                    localStorage: !!window.localStorage,
+                    sessionStorage: !!window.sessionStorage
+                }
+            };
+            
+            console.log('SentenceRewriter Pro Performance:', performanceData);
+        }
+
+        // Initialize performance tracking
+        window.addEventListener('load', trackPerformance);
+
+        // Export functionality for potential API integration
+        window.SentenceRewriterAPI = {
+            rewrite: performAdvancedRewrite,
+            setTone: selectTone,
+            getHistory: () => rewriteHistory,
+            clearHistory: () => {
+                rewriteHistory = [];
+                updateHistoryDisplay();
+                saveHistoryToStorage();
+            }
+        };
+    </script>
+</body>
+</html>
