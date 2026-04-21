@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToneShift Pro - Advanced Sentence Rewriter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .main-content {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .input-section, .output-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .input-section:hover, .output-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #2a5298;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '✨';
+            font-size: 1.2rem;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            font-family: inherit;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .tone-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tone-option {
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tone-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .tone-option:hover::before {
+            left: 100%;
+        }
+
+        .tone-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .tone-option.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .advanced-options {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .advanced-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slider-group {
+            margin-bottom: 15px;
+        }
+
+        .slider-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .process-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .process-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .process-btn:active {
+            transform: translateY(0);
+        }
+
+        .process-btn.processing {
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        .output-area {
+            min-height: 150px;
+            padding: 20px;
+            background: #f8f9fa;
+            border: 2px dashed #e1e8ed;
+            border-radius: 10px;
+            color: #666;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .output-area.has-content {
+            background: white;
+            border: 2px solid #667eea;
+            color: #333;
+        }
+
+        .statistics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .history-section {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .history-item {
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .history-original {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .history-rewritten {
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .history-meta {
+            font-size: 0.8rem;
+            color: #666;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .processing-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            color: #667eea;
+        }
+
+        .processing-indicator.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e1e8ed;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .tone-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ToneShift Pro</h1>
+            <p>Advanced AI-Powered Sentence Rewriting with Intelligent Tone Control</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">Input & Configuration</h2>
+                
+                <div class="input-group">
+                    <label for="original-text">Original Sentence</label>
+                    <textarea 
+                        id="original-text" 
+                        class="text-input" 
+                        placeholder="Enter your sentence here to transform it with AI-powered tone adjustment..."
+                        maxlength="500"
+                    ></textarea>
+                    <div style="text-align: right; font-size: 0.8rem; color: #666; margin-top: 5px;">
+                        <span id="char-count">0</span>/500 characters
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Select Tone Style</label>
+                    <div class="tone-grid">
+                        <div class="tone-option" data-tone="formal">📋 Formal</div>
+                        <div class="tone-option" data-tone="friendly">😊 Friendly</div>
+                        <div class="tone-option" data-tone="professional">💼 Professional</div>
+                        <div class="tone-option" data-tone="casual">😎 Casual</div>
+                        <div class="tone-option" data-tone="enthusiastic">🎉 Enthusiastic</div>
+                        <div class="tone-option" data-tone="persuasive">🎯 Persuasive</div>
+                        <div class="tone-option" data-tone="empathetic">❤️ Empathetic</div>
+                        <div class="tone-option" data-tone="authoritative">👑 Authoritative</div>
+                        <div class="tone-option" data-tone="humorous">😄 Humorous</div>
+                        <div class="tone-option" data-tone="diplomatic">🤝 Diplomatic</div>
+                    </div>
+                </div>
+
+                <div class="advanced-options">
+                    <div class="advanced-title">⚙️ Advanced Controls</div>
+                    
+                    <div class="slider-group">
+                        <label>Creativity Level: <span id="creativity-value">50</span>%</label>
+                        <input type="range" class="slider" id="creativity-slider" min="0" max="100" value="50">
+                    </div>
+                    
+                    <div class="slider-group">
+                        <label>Formality Level: <span id="formality-value">50</span>%</label>
+                        <input type="range" class="slider" id="formality-slider" min="0" max="100" value="50">
+                    </div>
+                    
+                    <div class="slider-group">
+                        <label>Sentence Complexity: <span id="complexity-value">50</span>%</label>
+                        <input type="range" class="slider" id="complexity-slider" min="0" max="100" value="50">
+                    </div>
+                </div>
+
+                <button class="process-btn" id="rewrite-btn">
+                    🚀 Transform Sentence
+                </button>
+                
+                <div class="processing-indicator" id="processing-indicator">
+                    <div class="spinner"></div>
+                    <span>AI is analyzing and rewriting your sentence...</span>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <h2 class="section-title">Rewritten Result</h2>
+                
+                <div class="output-area" id="output-area">
+                    Your transformed sentence will appear here with intelligent tone adaptation and enhanced clarity...
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn" id="copy-btn">📋 Copy</button>
+                    <button class="action-btn" id="regenerate-btn">🔄 Regenerate</button>
+                    <button class="action-btn" id="save-btn">💾 Save</button>
+                </div>
+
+                <div class="statistics">
+                    <div class="stat-card">
+                        <div class="stat-number" id="word-count">0</div>
+                        <div class="stat-label">Words</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="char-count-out">0</div>
+                        <div class="stat-label">Characters</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="readability-score">-</div>
+                        <div class="stat-label">Readability</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="tone-strength">-</div>
+                        <div class="stat-label">Tone Match</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <h2 class="section-title">🕒 Rewriting History</h2>
+                <div id="history-container">
+                    <p style="color: #666; font-style: italic; text-align: center; padding: 20px;">
+                        Your rewriting history will appear here as you use the tool...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ToneShiftPro {
+            constructor() {
+                this.selectedTone = 'formal';
+                this.history = this.loadHistory();
+                this.toneDefinitions = {
+                    formal: {
+                        patterns: ['utilize', 'furthermore', 'consequently', 'therefore', 'however'],
+                        avoid: ['gonna', 'wanna', 'yeah', 'ok', 'cool'],
+                        structure: 'complex'
+                    },
+                    friendly: {
+                        patterns: ['hey', 'thanks', 'appreciate', 'hope', 'feel free'],
+                        avoid: ['must', 'required', 'mandatory', 'demand'],
+                        structure: 'simple'
+                    },
+                    professional: {
+                        patterns: ['please', 'would appreciate', 'best regards', 'looking forward'],
+                        avoid: ['asap', 'fyi', 'btw', 'lol'],
+                        structure: 'balanced'
+                    },
+                    casual: {
+                        patterns: ['hey', 'cool', 'awesome', 'check out', 'no worries'],
+                        avoid: ['therefore', 'furthermore', 'consequently'],
+                        structure: 'simple'
+                    },
+                    enthusiastic: {
+                        patterns: ['amazing', 'fantastic', 'excited', 'thrilled', '!'],
+                        avoid: ['unfortunately', 'sadly', 'disappointed'],
+                        structure: 'energetic'
+                    },
+                    persuasive: {
+                        patterns: ['imagine', 'consider', 'proven', 'guaranteed', 'exclusive'],
+                        avoid: ['maybe', 'might', 'possibly', 'uncertain'],
+                        structure: 'compelling'
+                    },
+                    empathetic: {
+                        patterns: ['understand', 'feel', 'recognize', 'appreciate your'],
+                        avoid: ['obviously', 'clearly', 'simply', 'just'],
+                        structure: 'supportive'
+                    },
+                    authoritative: {
+                        patterns: ['must', 'will', 'required', 'essential', 'critical'],
+                        avoid: ['maybe', 'possibly', 'might', 'could'],
+                        structure: 'decisive'
+                    },
+                    humorous: {
+                        patterns: ['funny thing', 'ironically', 'amusing', 'witty'],
+                        avoid: ['serious', 'critical', 'urgent', 'important'],
+                        structure: 'playful'
+                    },
+                    diplomatic: {
+                        patterns: ['perhaps', 'might consider', 'would suggest', 'alternative'],
+                        avoid: ['wrong', 'bad', 'terrible', 'awful'],
+                        structure: 'tactful'
+                    }
+                };
+                this.initializeEventListeners();
+                this.updateCharacterCount();
+                this.renderHistory();
+            }
+
+            initializeEventListeners() {
+                // Tone selection
+                document.querySelectorAll('.tone-option').forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        document.querySelectorAll('.tone-option').forEach(opt => opt.classList.remove('selected'));
+                        e.target.classList.add('selected');
+                        this.selectedTone = e.target.dataset.tone;
+                        this.updateSliderDefaults();
+                    });
+                });
+
+                // Set default tone
+                document.querySelector('[data-tone="formal"]').classList.add('selected');
+
+                // Character count
+                document.getElementById('original-text').addEventListener('input', () => {
+                    this.updateCharacterCount();
+                });
+
+                // Sliders
+                document.getElementById('creativity-slider').addEventListener('input', (e) => {
+                    document.getElementById('creativity-value').textContent = e.target.value;
+                });
+
+                document.getElementById('formality-slider').addEventListener('input', (e) => {
+                    document.getElementById('formality-value').textContent = e.target.value;
+                });
+
+                document.getElementById('complexity-slider').addEventListener('input', (e) => {
+                    document.getElementById('complexity-value').textContent = e.target.value;
+                });
+
+                // Main rewrite button
+                document.getElementById('rewrite-btn').addEventListener('click', () => {
+                    this.rewriteSentence();
+                });
+
+                // Action buttons
+                document.getElementById('copy-btn').addEventListener('click', () => {
+                    this.copyToClipboard();
+                });
+
+                document.getElementById('regenerate-btn').addEventListener('click', () => {
+                    this.rewriteSentence();
+                });
+
+                document.getElementById('save-btn').addEventListener('click', () => {
+                    this.saveToHistory();
+                });
+
+                // Enter key support
+                document.getElementById('original-text').addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        this.rewriteSentence();
+                    }
+                });
+            }
+
+            updateCharacterCount() {
+                const text = document.getElementById('original-text').value;
+                document.getElementById('char-count').textContent = text.length;
+                
+                // Update color based on length
+                const counter = document.getElementById('char-count');
+                if (text.length > 450) {
+                    counter.style.color = '#e74c3c';
+                } else if (text.length > 350) {
+                    counter.style.color = '#f39c12';
+                } else {
+                    counter.style.color = '#666';
+                }
+            }
+
+            updateSliderDefaults() {
+                const toneConfig = {
+                    formal: { creativity: 20, formality: 90, complexity: 80 },
+                    friendly: { creativity: 60, formality: 30, complexity: 40 },
+                    professional: { creativity: 40, formality: 70, complexity: 60 },
+                    casual: { creativity: 70, formality: 20, complexity: 30 },
+                    enthusiastic: { creativity: 80, formality: 40, complexity: 50 },
+                    persuasive: { creativity: 75, formality: 60, complexity: 70 },
+                    empathetic: { creativity: 50, formality: 50, complexity: 50 },
+                    authoritative: { creativity: 30, formality: 80, complexity: 70 },
+                    humorous: { creativity: 90, formality: 30, complexity: 60 },
+                    diplomatic: { creativity: 40, formality: 75, complexity: 65 }
+                };
+
+                const config = toneConfig[this.selectedTone] || toneConfig.formal;
+                
+                document.getElementById('creativity-slider').value = config.creativity;
+                document.getElementById('formality-slider').value = config.formality;
+                document.getElementById('complexity-slider').value = config.complexity;
+                
+                document.getElementById('creativity-value').textContent = config.creativity;
+                document.getElementById('formality-value').textContent = config.formality;
+                document.getElementById('complexity-value').textContent = config.complexity;
+            }
+
+            async rewriteSentence() {
+                const originalText = document.getElementById('original-text').value.trim();
+                
+                if (!originalText) {
+                    alert('Please enter a sentence to rewrite.');
+                    return;
+                }
+
+                const rewriteBtn = document.getElementById('rewrite-btn');
+                const processingIndicator = document.getElementById('processing-indicator');
+                
+                // Show processing state
+                rewriteBtn.classList.add('processing');
+                rewriteBtn.textContent = 'Processing...';
+                processingIndicator.classList.add('active');
+
+                try {
+                    // Simulate API processing time
+                    await this.delay(1500 + Math.random() * 1000);
+                    
+                    const rewrittenText = this.processWithToneAlgorithm(originalText);
+                    this.displayResult(rewrittenText);
+                    this.updateStatistics(rewrittenText);
+                    
+                } catch (error) {
+                    console.error('Rewriting error:', error);
+                    document.getElementById('output-area').textContent = 'Error processing your request. Please try again.';
+                } finally {
+                    // Reset button state
+                    rewriteBtn.classList.remove('processing');
+                    rewriteBtn.textContent = '🚀 Transform Sentence';
+                    processingIndicator.classList.remove('active');
+                }
+            }
+
+            processWithToneAlgorithm(text) {
+                const creativity = parseInt(document.getElementById('creativity-slider').value);
+                const formality = parseInt(document.getElementById('formality-slider').value);
+                const complexity = parseInt(document.getElementById('complexity-slider').value);
+                
+                let rewritten = text;
+                const toneConfig = this.toneDefinitions[this.selectedTone];
+                
+                // Apply tone-specific transformations
+                switch(this.selectedTone) {
+                    case 'formal':
+                        rewritten = this.applyFormalTone(rewritten, formality);
+                        break;
+                    case 'friendly':
+                        rewritten = this.applyFriendlyTone(rewritten);
+                        break;
+                    case 'professional':
+                        rewritten = this.applyProfessionalTone(rewritten);
+                        break;
+                    case 'casual':
+                        rewritten = this.applyCasualTone(rewritten);
+                        break;
+                    case 'enthusiastic':
+                        rewritten = this.applyEnthusiasticTone(rewritten);
+                        break;
+                    case 'persuasive':
+                        rewritten = this.applyPersuasiveTone(rewritten);
+                        break;
+                    case 'empathetic':
+                        rewritten = this.applyEmpatheticTone(rewritten);
+                        break;
+                    case 'authoritative':
+                        rewritten = this.applyAuthoritativeTone(rewritten);
+                        break;
+                    case 'humorous':
+                        rewritten = this.applyHumorousTone(rewritten);
+                        break;
+                    case 'diplomatic':
+                        rewritten = this.applyDiplomaticTone(rewritten);
+                        break;
+                }
+                
+                // Apply creativity adjustments
+                if (creativity > 70) {
+                    rewritten = this.addCreativeElements(rewritten);
+                } else if (creativity < 30) {
+                    rewritten = this.makeMoreConservative(rewritten);
+                }
+                
+                // Apply complexity adjustments
+                if (complexity > 70) {
+                    rewritten = this.increaseComplexity(rewritten);
+                } else if (complexity < 30) {
+                    rewritten = this.simplifyStructure(rewritten);
+                }
+                
+                return rewritten;
+            }
+
+            applyFormalTone(text, formality) {
+                let result = text;
+                
+                // Replace contractions
+                const contractions = {
+                    "don't": "do not",
+                    "won't": "will not",
+                    "can't": "cannot",
+                    "shouldn't": "should not",
+                    "wouldn't": "would not",
+                    "couldn't": "could not",
+                    "isn't": "is not",
+                    "aren't": "are not",
+                    "wasn't": "was not",
+                    "weren't": "were not",
+                    "hasn't": "has not",
+                    "haven't": "have not",
+                    "hadn't": "had not"
+                };
+                
+                Object.keys(contractions).forEach(contraction => {
+                    result = result.replace(new RegExp(contraction, 'gi'), contractions[contraction]);
+                });
+                
+                // Add formal prefixes based on formality level
+                if (formality > 80) {
+                    if (!result.match(/^(Furthermore|Moreover|Additionally|Consequently)/)) {
+                        const prefixes = ['Furthermore, ', 'Moreover, ', 'Additionally, ', 'Consequently, '];
+                        result = prefixes[Math.floor(Math.random() * prefixes.length)] + result.toLowerCase();
+                    }
+                }
+                
+                // Replace informal words
+                const informalToFormal = {
+                    'get': 'obtain',
+                    'help': 'assist',
+                    'show': 'demonstrate',
+                    'big': 'substantial',
+                    'good': 'beneficial',
+                    'bad': 'detrimental',
+                    'start': 'commence',
+                    'end': 'conclude'
+                };
+                
+                Object.keys(informalToFormal).forEach(informal => {
+                    result = result.replace(new RegExp('\\b' + informal + '\\b', 'gi'), informalToFormal[informal]);
+                });
+                
+                return result;
+            }
+
+            applyFriendlyTone(text) {
+                let result = text;
+                
+                // Add friendly prefixes
+                const friendlyPrefixes = ['Hey there! ', 'Hope you\'re doing well! ', 'Just wanted to say ', ''];
+                if (Math.random() > 0.7) {
+                    result = friendlyPrefixes[Math.floor(Math.random() * friendlyPrefixes.length)] + result;
+                }
+                
+                // Add friendly suffixes
+                const friendlySuffixes = [' Hope this helps!', ' Thanks so much!', ' Have a great day!', ''];
+                if (Math.random() > 0.6) {
+                    result += friendlySuffixes[Math.floor(Math.random() * friendlySuffixes.length)];
+                }
+                
+                // Replace harsh words
+                const harshToFriendly = {
+                    'must': 'could',
+                    'need to': 'might want to',
+                    'should': 'could',
+                    'required': 'helpful',
+                    'demand': 'ask',
+                    'immediately': 'when you get a chance'
+                };
+                
+                Object.keys(harshToFriendly).forEach(harsh => {
+                    result = result.replace(new RegExp('\\b' + harsh + '\\b', 'gi'), harshToFriendly[harsh]);
+                });
+                
+                return result;
+            }
+
+            applyProfessionalTone(text) {
+                let result = text;
+                
+                // Professional structure improvements
+                if (!result.match(/^(Please|I would|We recommend|It is advised)/)) {
+                    const professionalStarters = ['Please note that ', 'I would like to inform you that ', 'We recommend that ', 'It is advised that '];
+                    if (Math.random() > 0.5) {
+                        result = professionalStarters[Math.floor(Math.random() * professionalStarters.length)] + result.toLowerCase();
+                    }
+                }
+                
+                // Replace casual terms
+                const casualToProfessional = {
+                    'ok': 'acceptable',
+                    'cool': 'excellent',
+                    'awesome': 'outstanding',
+                    'yeah': 'yes',
+                    'nope': 'no',
+                    'gonna': 'going to',
+                    'wanna': 'want to'
+                };
+                
+                Object.keys(casualToProfessional).forEach(casual => {
+                    result = result.replace(new RegExp('\\b' + casual + '\\b', 'gi'), casualToProfessional[casual]);
+                });
+                
+                return result;
+            }
+
+            applyCasualTone(text) {
+                let result = text;
+                
+                // Make contractions
+                const expansionToContraction = {
+                    'do not': "don't",
+                    'will not': "won't",
+                    'cannot': "can't",
+                    'should not': "shouldn't",
+                    'would not': "wouldn't",
+                    'could not': "couldn't",
+                    'is not': "isn't",
+                    'are not': "aren't"
+                };
+                
+                Object.keys(expansionToContraction).forEach(expansion => {
+                    result = result.replace(new RegExp(expansion, 'gi'), expansionToContraction[expansion]);
+                });
+                
+                // Add casual elements
+                const casualPrefixes = ['So, ', 'Well, ', 'Actually, ', 'You know, ', ''];
+                if (Math.random() > 0.6) {
+                    result = casualPrefixes[Math.floor(Math.random() * casualPrefixes.length)] + result;
+                }
+                
+                return result;
+            }
+
+            applyEnthusiasticTone(text) {
+                let result = text;
+                
+                // Add enthusiastic words
+                const enthusiasticWords = ['amazing', 'fantastic', 'incredible', 'awesome', 'brilliant'];
+                const words = result.split(' ');
+                
+                // Randomly inject enthusiasm
+                if (Math.random() > 0.7) {
+                    const randomWord = enthusiasticWords[Math.floor(Math.random() * enthusiasticWords.length)];
+                    result = 'This is ' + randomWord + '! ' + result;
+                }
+                
+                // Add exclamation points (but not too many)
+                if (!result.includes('!') && Math.random() > 0.4) {
+                    result = result.replace(/\.$/, '!');
+                }
+                
+                return result;
+            }
+
+            applyPersuasiveTone(text) {
+                let result = text;
+                
+                // Add persuasive elements
+                const persuasiveStarters = ['Imagine if ', 'Consider how ', 'What if ', 'You\'ll discover that '];
+                if (Math.random() > 0.6) {
+                    result = persuasiveStarters[Math.floor(Math.random() * persuasiveStarters.length)] + result.toLowerCase();
+                }
+                
+                // Replace weak words with strong ones
+                const weakToStrong = {
+                    'might': 'will',
+                    'possibly': 'definitely',
+                    'maybe': 'certainly',
+                    'could': 'will',
+                    'try': 'achieve'
+                };
+                
+                Object.keys(weakToStrong).forEach(weak => {
+                    result = result.replace(new RegExp('\\b' + weak + '\\b', 'gi'), weakToStrong[weak]);
+                });
+                
+                return result;
+            }
+
+            applyEmpatheticTone(text) {
+                let result = text;
+                
+                // Add empathetic phrases
+                const empatheticPrefixes = ['I understand that ', 'I can see how ', 'It\'s clear that ', 'I recognize that '];
+                if (Math.random() > 0.5) {
+                    result = empatheticPrefixes[Math.floor(Math.random() * empatheticPrefixes.length)] + result.toLowerCase();
+                }
+                
+                // Soften harsh language
+                const harshToSoft = {
+                    'wrong': 'not quite right',
+                    'bad': 'challenging',
+                    'terrible': 'difficult',
+                    'awful': 'tough',
+                    'stupid': 'unclear'
+                };
+                
+                Object.keys(harshToSoft).forEach(harsh => {
+                    result = result.replace(new RegExp('\\b' + harsh + '\\b', 'gi'), harshToSoft[harsh]);
+                });
+                
+                return result;
+            }
+
+            applyAuthoritativeTone(text) {
+                let result = text;
+                
+                // Make statements more definitive
+                const tentativeToDefinitive = {
+                    'might': 'will',
+                    'could': 'must',
+                    'possibly': 'certainly',
+                    'maybe': 'definitely',
+                    'think': 'know',
+                    'believe': 'am certain'
+                };
+                
+                Object.keys(tentativeToDefinitive).forEach(tentative => {
+                    result = result.replace(new RegExp('\\b' + tentative + '\\b', 'gi'), tentativeToDefinitive[tentative]);
+                });
+                
+                // Add authoritative prefixes
+                const authoritativePrefixes = ['It is essential that ', 'You must understand that ', 'It is critical that ', 'Research shows that '];
+                if (Math.random() > 0.6) {
+                    result = authoritativePrefixes[Math.floor(Math.random() * authoritativePrefixes.length)] + result.toLowerCase();
+                }
+                
+                return result;
+            }
+
+            applyHumorousTone(text) {
+                let result = text;
+                
+                // Add light humor elements
+                const humorousPrefixes = ['Funny enough, ', 'Interestingly, ', 'Here\'s the thing: ', 'Plot twist: '];
+                if (Math.random() > 0.7) {
+                    result = humorousPrefixes[Math.floor(Math.random() * humorousPrefixes.length)] + result.toLowerCase();
+                }
+                
+                // Add playful suffixes
+                const humorousSuffixes = [' (who knew?)', ' (go figure!)', ' (life\'s funny that way)', ''];
+                if (Math.random() > 0.8) {
+                    result += humorousSuffixes[Math.floor(Math.random() * humorousSuffixes.length)];
+                }
+                
+                return result;
+            }
+
+            applyDiplomaticTone(text) {
+                let result = text;
+                
+                // Add diplomatic qualifiers
+                const diplomaticPrefixes = ['Perhaps it would be beneficial to ', 'One might consider ', 'It could be suggested that ', 'An alternative approach might be to '];
+                if (Math.random() > 0.5) {
+                    result = diplomaticPrefixes[Math.floor(Math.random() * diplomaticPrefixes.length)] + result.toLowerCase();
+                }
+                
+                // Soften direct statements
+                const directToDiplomatic = {
+                    'you should': 'you might consider',
+                    'you must': 'it would be advisable to',
+                    'wrong': 'not entirely accurate',
+                    'bad': 'less than optimal',
+                    'no': 'perhaps not'
+                };
+                
+                Object.keys(directToDiplomatic).forEach(direct => {
+                    result = result.replace(new RegExp('\\b' + direct + '\\b', 'gi'), directToDiplomatic[direct]);
+                });
+                
+                return result;
+            }
+
+            addCreativeElements(text) {
+                // Add metaphors or creative expressions
+                const creativeElements = [
+                    'like a breath of fresh air',
+                    'as smooth as silk',
+                    'crystal clear',
+                    'right on the money',
+                    'hit the nail on the head'
+                ];
+                
+                if (Math.random() > 0.8) {
+                    const element = creativeElements[Math.floor(Math.random() * creativeElements.length)];
+                    text = text.replace(/\bgood\b/gi, element);
+                }
+                
+                return text;
+            }
+
+            makeMoreConservative(text) {
+                // Remove excessive adjectives and keep it simple
+                const excessiveWords = ['very', 'extremely', 'incredibly', 'absolutely', 'totally'];
+                excessiveWords.forEach(word => {
+                    text = text.replace(new RegExp('\\b' + word + '\\s+', 'gi'), '');
+                });
+                
+                return text;
+            }
+
+            increaseComplexity(text) {
+                // Add complex sentence structures
+                if (text.includes(',')) return text; // Already has some complexity
+                
+                const complexifiers = [
+                    ', which demonstrates that',
+                    ', thereby indicating that',
+                    ', consequently leading to',
+                    ', thus establishing that'
+                ];
+                
+                const parts = text.split('.');
+                if (parts.length > 1) {
+                    const complexifier = complexifiers[Math.floor(Math.random() * complexifiers.length)];
+                    return parts[0] + complexifier + ' ' + parts.slice(1).join('.').trim().toLowerCase();
+                }
+                
+                return text;
+            }
+
+            simplifyStructure(text) {
+                // Break down complex sentences
+                text = text.replace(/,\s*which/gi, '. This');
+                text = text.replace(/,\s*thereby/gi, '. This');
+                text = text.replace(/,\s*consequently/gi, '. So');
+                text = text.replace(/,\s*thus/gi, '. This');
+                
+                return text;
+            }
+
+            displayResult(text) {
+                const outputArea = document.getElementById('output-area');
+                outputArea.textContent = text;
+                outputArea.classList.add('has-content');
+                
+                // Animate the result appearance
+                outputArea.style.opacity = '0';
+                outputArea.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    outputArea.style.transition = 'all 0.5s ease';
+                    outputArea.style.opacity = '1';
+                    outputArea.style.transform = 'translateY(0)';
+                }, 100);
+            }
+
+            updateStatistics(text) {
+                const words = text.trim().split(/\s+/).length;
+                const chars = text.length;
+                const readability = this.calculateReadabilityScore(text);
+                const toneMatch = this.calculateToneMatch(text);
+                
+                document.getElementById('word-count').textContent = words;
+                document.getElementById('char-count-out').textContent = chars;
+                document.getElementById('readability-score').textContent = readability;
+                document.getElementById('tone-strength').textContent = toneMatch + '%';
+                
+                // Animate statistics
+                this.animateStatistics();
+            }
+
+            calculateReadabilityScore(text) {
+                // Simplified Flesch Reading Ease approximation
+                const words = text.trim().split(/\s+/).length;
+                const sentences = text.split(/[.!?]+/).length - 1 || 1;
+                const syllables = this.estimateSyllables(text);
+                
+                const avgWordsPerSentence = words / sentences;
+                const avgSyllablesPerWord = syllables / words;
+                
+                const score = 206.835 - (1.015 * avgWordsPerSentence) - (84.6 * avgSyllablesPerWord);
+                
+                if (score >= 90) return 'A+';
+                if (score >= 80) return 'A';
+                if (score >= 70) return 'B';
+                if (score >= 60) return 'C';
+                if (score >= 50) return 'D';
+                return 'F';
+            }
+
+            estimateSyllables(text) {
+                const words = text.toLowerCase().split(/\s+/);
+                let totalSyllables = 0;
+                
+                words.forEach(word => {
+                    const vowels = word.match(/[aeiouy]+/g);
+                    let syllables = vowels ? vowels.length : 1;
+                    
+                    // Adjust for silent e
+                    if (word.endsWith('e')) syllables--;
+                    if (syllables === 0) syllables = 1;
+                    
+                    totalSyllables += syllables;
+                });
+                
+                return totalSyllables;
+            }
+
+            calculateToneMatch(text) {
+                const toneConfig = this.toneDefinitions[this.selectedTone];
+                if (!toneConfig) return 85;
+                
+                let matchScore = 50;
+                const textLower = text.toLowerCase();
+                
+                // Check for tone-appropriate patterns
+                toneConfig.patterns.forEach(pattern => {
+                    if (textLower.includes(pattern.toLowerCase())) {
+                        matchScore += 10;
+                    }
+                });
+                
+                // Deduct for tone-inappropriate words
+                toneConfig.avoid.forEach(avoidWord => {
+                    if (textLower.includes(avoidWord.toLowerCase())) {
+                        matchScore -= 15;
+                    }
+                });
+                
+                return Math.min(Math.max(matchScore, 10), 100);
+            }
+
+            animateStatistics() {
+                document.querySelectorAll('.stat-card').forEach((card, index) => {
+                    card.style.animation = 'none';
+                    setTimeout(() => {
+                        card.style.animation = `pulse 0.6s ease ${index * 0.1}s`;
+                    }, 100);
+                });
+            }
+
+            async copyToClipboard() {
+                const outputText = document.getElementById('output-area').textContent;
+                if (!outputText || outputText.includes('will appear here')) {
+                    alert('No text to copy!');
+                    return;
+                }
+                
+                try {
+                    await navigator.clipboard.writeText(outputText);
+                    const copyBtn = document.getElementById('copy-btn');
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = '✅ Copied!';
+                    copyBtn.style.background = '#27ae60';
+                    
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                        copyBtn.style.background = '';
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy to clipboard');
+                }
+            }
+
+            saveToHistory() {
+                const originalText = document.getElementById('original-text').value.trim();
+                const rewrittenText = document.getElementById('output-area').textContent;
+                
+                if (!originalText || !rewrittenText || rewrittenText.includes('will appear here')) {
+                    alert('No content to save!');
+                    return;
+                }
+                
+                const historyItem = {
+                    id: Date.now(),
+                    original: originalText,
+                    rewritten: rewrittenText,
+                    tone: this.selectedTone,
+                    timestamp: new Date().toLocaleString(),
+                    creativity: document.getElementById('creativity-slider').value,
+                    formality: document.getElementById('formality-slider').value,
+                    complexity: document.getElementById('complexity-slider').value
+                };
+                
+                this.history.unshift(historyItem);
+                
+                // Keep only last 10 items
+                if (this.history.length > 10) {
+                    this.history = this.history.slice(0, 10);
+                }
+                
+                this.saveHistory();
+                this.renderHistory();
+                
+                // Show confirmation
+                const saveBtn = document.getElementById('save-btn');
+                const originalText_btn = saveBtn.textContent;
+                saveBtn.textContent = '✅ Saved!';
+                saveBtn.style.background = '#27ae60';
+                
+                setTimeout(() => {
+                    saveBtn.textContent = originalText_btn;
+                    saveBtn.style.background = '';
+                }, 2000);
+            }
+
+            renderHistory() {
+                const container = document.getElementById('history-container');
+                
+                if (this.history.length === 0) {
+                    container.innerHTML = `
+                        <p style="color: #666; font-style: italic; text-align: center; padding: 20px;">
+                            Your rewriting history will appear here as you use the tool...
+                        </p>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = this.history.map(item => `
+                    <div class="history-item">
+                        <div class="history-original"><strong>Original:</strong> ${item.original}</div>
+                        <div class="history-rewritten"><strong>Rewritten (${item.tone}):</strong> ${item.rewritten}</div>
+                        <div class="history-meta">
+                            <span>${item.timestamp}</span>
+                            <span>C:${item.creativity}% F:${item.formality}% Cx:${item.complexity}%</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            loadHistory() {
+                try {
+                    return JSON.parse(localStorage.getItem('toneshift-history') || '[]');
+                } catch (e) {
+                    return [];
+                }
+            }
+
+            saveHistory() {
+                try {
+                    localStorage.setItem('toneshift-history', JSON.stringify(this.history));
+                } catch (e) {
+                    console.warn('Could not save history to localStorage');
+                }
+            }
+
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new ToneShiftPro();
+        });
+    </script>
+</body>
+</html>
