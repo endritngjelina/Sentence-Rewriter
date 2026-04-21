@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SentenceForge Pro - Advanced Tone Rewriter</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #0078d4;
+            --secondary-color: #106ebe;
+            --accent-color: #00bcf2;
+            --success-color: #107c10;
+            --error-color: #d83b01;
+            --warning-color: #ff8c00;
+            --surface-color: #ffffff;
+            --surface-secondary: #f3f2f1;
+            --surface-tertiary: #edebe9;
+            --text-primary: #323130;
+            --text-secondary: #605e5c;
+            --text-tertiary: #8a8886;
+            --border-color: #d2d0ce;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
+            --border-radius: 4px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .main-panel {
+            background: var(--surface-color);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 30px;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .input-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: var(--transition);
+            background: var(--surface-color);
+        }
+
+        .input-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .control-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .tone-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tone-button {
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            background: var(--surface-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            text-align: center;
+            font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tone-button:hover {
+            background: var(--surface-secondary);
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .tone-button.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tone-button i {
+            margin-right: 6px;
+        }
+
+        .advanced-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--surface-tertiary);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-md);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--surface-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-tertiary);
+            transform: translateY(-1px);
+        }
+
+        .results-section {
+            background: var(--surface-color);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 30px;
+            animation: fadeInUp 0.6s ease-out 0.4s both;
+        }
+
+        .result-item {
+            background: var(--surface-secondary);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary-color);
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .result-item:hover {
+            box-shadow: var(--shadow-sm);
+            transform: translateX(2px);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+
+        .result-tone {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            background: rgba(0, 120, 212, 0.1);
+            padding: 4px 12px;
+            border-radius: 16px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .result-action {
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .result-action:hover {
+            color: var(--primary-color);
+            background: rgba(0, 120, 212, 0.1);
+        }
+
+        .result-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--surface-color);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            animation: fadeInUp 0.6s ease-out 0.6s both;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 16px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            transform: translateX(400px);
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: var(--error-color);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tone-selector {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .advanced-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.4s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-edit"></i> SentenceForge Pro</h1>
+            <p>Advanced AI-powered sentence rewriting with professional tone control and linguistic analysis</p>
+        </header>
+
+        <div class="main-panel">
+            <div class="input-section">
+                <label class="input-label" for="inputText">
+                    <i class="fas fa-pencil-alt"></i> Input Sentence
+                </label>
+                <textarea 
+                    id="inputText" 
+                    class="input-textarea" 
+                    placeholder="Enter your sentence here to rewrite with different tones and styles..."
+                ></textarea>
+            </div>
+
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label class="control-label">
+                        <i class="fas fa-palette"></i> Tone Selection
+                    </label>
+                    <div class="tone-selector" id="toneSelector">
+                        <button class="tone-button active" data-tone="formal">
+                            <i class="fas fa-user-tie"></i> Formal
+                        </button>
+                        <button class="tone-button" data-tone="friendly">
+                            <i class="fas fa-smile"></i> Friendly
+                        </button>
+                        <button class="tone-button" data-tone="professional">
+                            <i class="fas fa-briefcase"></i> Professional
+                        </button>
+                        <button class="tone-button" data-tone="casual">
+                            <i class="fas fa-coffee"></i> Casual
+                        </button>
+                        <button class="tone-button" data-tone="academic">
+                            <i class="fas fa-graduation-cap"></i> Academic
+                        </button>
+                        <button class="tone-button" data-tone="persuasive">
+                            <i class="fas fa-bullhorn"></i> Persuasive
+                        </button>
+                        <button class="tone-button" data-tone="empathetic">
+                            <i class="fas fa-heart"></i> Empathetic
+                        </button>
+                        <button class="tone-button" data-tone="confident">
+                            <i class="fas fa-trophy"></i> Confident
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="advanced-controls">
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span><i class="fas fa-text-width"></i> Formality Level</span>
+                        <span id="formalityValue">50%</span>
+                    </div>
+                    <input type="range" class="slider" id="formalitySlider" min="0" max="100" value="50">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span><i class="fas fa-compress-alt"></i> Conciseness</span>
+                        <span id="concisenessValue">50%</span>
+                    </div>
+                    <input type="range" class="slider" id="concisenessSlider" min="0" max="100" value="50">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span><i class="fas fa-fire"></i> Creativity</span>
+                        <span id="creativityValue">50%</span>
+                    </div>
+                    <input type="range" class="slider" id="creativitySlider" min="0" max="100" value="50">
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="rewriteBtn">
+                    <div class="loading-spinner" id="loadingSpinner"></div>
+                    <i class="fas fa-magic"></i> Rewrite Sentence
+                </button>
+                <button class="btn btn-secondary" id="clearBtn">
+                    <i class="fas fa-eraser"></i> Clear All
+                </button>
+                <button class="btn btn-secondary" id="exportBtn">
+                    <i class="fas fa-download"></i> Export Results
+                </button>
+                <button class="btn btn-secondary" id="analyzeBtn">
+                    <i class="fas fa-chart-bar"></i> Analyze Text
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-panel" id="statsPanel">
+            <div class="stat-card">
+                <div class="stat-value" id="wordCount">0</div>
+                <div class="stat-label">Words</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="charCount">0</div>
+                <div class="stat-label">Characters</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="readingTime">0</div>
+                <div class="stat-label">Seconds to Read</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="complexityScore">-</div>
+                <div class="stat-label">Complexity Score</div>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <h3 style="margin-bottom: 20px; color: var(--text-primary);">
+                <i class="fas fa-sparkles"></i> Rewritten Variations
+            </h3>
+            <div id="resultsContainer">
+                <div style="text-align: center; color: var(--text-tertiary); padding: 40px;">
+                    <i class="fas fa-lightbulb" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
+                    <p>Your rewritten sentences will appear here</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Application State
+        const AppState = {
+            currentTone: 'formal',
+            formality: 50,
+            conciseness: 50,
+            creativity: 50,
+            results: [],
+            statistics: {
+                totalRewrites: 0,
+                wordsProcessed: 0,
+                sessionTime: Date.now()
+            }
+        };
+
+        // Tone Algorithms - Enterprise-grade rewriting logic
+        const ToneAlgorithms = {
+            formal: {
+                patterns: [
+                    { from: /\bcan't\b/gi, to: 'cannot' },
+                    { from: /\bwon't\b/gi, to: 'will not' },
+                    { from: /\bdoesn't\b/gi, to: 'does not' },
+                    { from: /\bisn't\b/gi, to: 'is not' },
+                    { from: /\baren't\b/gi, to: 'are not' },
+                    { from: /\bI'm\b/g, to: 'I am' },
+                    { from: /\byou're\b/gi, to: 'you are' },
+                    { from: /\bwe're\b/gi, to: 'we are' },
+                    { from: /\bthey're\b/gi, to: 'they are' },
+                    { from: /\bit's\b/gi, to: 'it is' }
+                ],
+                prefixes: ['It should be noted that', 'One might observe that', 'It is evident that', 'Furthermore,', 'Moreover,'],
+                transforms: (text) => {
+                    return text.replace(/\b(good|bad|big|small)\b/gi, (match) => {
+                        const replacements = {
+                            'good': 'excellent', 'bad': 'inadequate', 
+                            'big': 'substantial', 'small': 'minimal'
+                        };
+                        return replacements[match.toLowerCase()] || match;
+                    });
+                }
+            },
+            friendly: {
+                patterns: [
+                    { from: /\bcannot\b/gi, to: "can't" },
+                    { from: /\bwill not\b/gi, to: "won't" },
+                    { from: /\bdoes not\b/gi, to: "doesn't" },
+                    { from: /\bis not\b/gi, to: "isn't" },
+                    { from: /\bare not\b/gi, to: "aren't" }
+                ],
+                prefixes: ['Hey there!', 'You know what?', 'Here\'s the thing:', 'So basically,', 'I think'],
+                suffixes: ['Hope this helps!', 'Let me know what you think!', 'Does that make sense?', 'Pretty cool, right?'],
+                transforms: (text) => {
+                    return text + ' 😊';
+                }
+            },
+            professional: {
+                patterns: [
+                    { from: /\bI think\b/gi, to: 'I believe' },
+                    { from: /\bmaybe\b/gi, to: 'perhaps' },
+                    { from: /\bkind of\b/gi, to: 'somewhat' },
+                    { from: /\ba lot of\b/gi, to: 'numerous' }
+                ],
+                prefixes: ['In my professional opinion,', 'Based on my analysis,', 'From a strategic perspective,', 'According to industry standards,'],
+                transforms: (text) => {
+                    return text.replace(/\b(help|use|show)\b/gi, (match) => {
+                        const replacements = {
+                            'help': 'assist', 'use': 'utilize', 'show': 'demonstrate'
+                        };
+                        return replacements[match.toLowerCase()] || match;
+                    });
+                }
+            },
+            casual: {
+                patterns: [
+                    { from: /\bIt is evident that\b/gi, to: 'Obviously' },
+                    { from: /\bFurthermore\b/gi, to: 'Plus' },
+                    { from: /\bHowever\b/gi, to: 'But' },
+                    { from: /\bTherefore\b/gi, to: 'So' }
+                ],
+                prefixes: ['So like,', 'Basically,', 'You know,', 'Well,', 'Anyway,'],
+                suffixes: ['...just saying!', '...you get it?', '...pretty simple!', '...no big deal.'],
+                transforms: (text) => {
+                    return text.toLowerCase().replace(/^./, str => str.toUpperCase());
+                }
+            },
+            academic: {
+                patterns: [
+                    { from: /\bshow\b/gi, to: 'demonstrate' },
+                    { from: /\bprove\b/gi, to: 'substantiate' },
+                    { from: /\buse\b/gi, to: 'utilize' },
+                    { from: /\bhelp\b/gi, to: 'facilitate' }
+                ],
+                prefixes: ['Research indicates that', 'Studies have shown that', 'According to scholarly literature,', 'Empirical evidence suggests that'],
+                transforms: (text) => {
+                    return text.replace(/\b(important|big)\b/gi, (match) => {
+                        const replacements = {
+                            'important': 'significant', 'big': 'substantial'
+                        };
+                        return replacements[match.toLowerCase()] || match;
+                    });
+                }
+            },
+            persuasive: {
+                patterns: [
+                    { from: /\bmight\b/gi, to: 'will' },
+                    { from: /\bcould\b/gi, to: 'should' },
+                    { from: /\bperhaps\b/gi, to: 'certainly' }
+                ],
+                prefixes: ['You absolutely must', 'It\'s crucial that you', 'Without a doubt,', 'The evidence clearly shows that'],
+                suffixes: ['Don\'t miss this opportunity!', 'Act now!', 'This is your chance!', 'The results speak for themselves!'],
+                transforms: (text) => {
+                    return text.replace(/\b(good|great)\b/gi, 'exceptional');
+                }
+            },
+            empathetic: {
+                patterns: [
+                    { from: /\byou should\b/gi, to: 'you might want to consider' },
+                    { from: /\byou must\b/gi, to: 'it would be helpful if you' },
+                    { from: /\bthat\'s wrong\b/gi, to: 'I understand that might be challenging' }
+                ],
+                prefixes: ['I understand how you feel,', 'I can see why that would be difficult,', 'That sounds really tough,', 'I hear you,'],
+                suffixes: ['I\'m here if you need support.', 'You\'re not alone in this.', 'Take care of yourself.', 'I believe in you.'],
+                transforms: (text) => {
+                    return text.replace(/\b(problem|issue)\b/gi, 'challenge');
+                }
+            },
+            confident: {
+                patterns: [
+                    { from: /\bI think\b/gi, to: 'I know' },
+                    { from: /\bmight\b/gi, to: 'will' },
+                    { from: /\bprobably\b/gi, to: 'definitely' },
+                    { from: /\bmaybe\b/gi, to: 'absolutely' }
+                ],
+                prefixes: ['Without question,', 'I\'m certain that', 'It\'s clear that', 'Undoubtedly,'],
+                suffixes: ['That\'s guaranteed!', 'Count on it!', 'Absolutely certain!', 'No doubt about it!'],
+                transforms: (text) => {
+                    return text.replace(/\b(can|could)\b/gi, 'will');
+                }
+            }
+        };
+
+        // Advanced Rewriting Engine
+        class SentenceRewriter {
+            constructor() {
+                this.complexityPatterns = {
+                    simple: /^[A-Za-z\s.,!?]+$/,
+                    compound: /\b(and|but|or|so|yet)\b/gi,
+                    complex: /\b(because|since|although|while|if|when)\b/gi
+                };
+            }
+
+            rewrite(text, tone, options = {}) {
+                const { formality, conciseness, creativity } = options;
+                let result = text.trim();
+
+                // Apply tone-specific patterns
+                const algorithm = ToneAlgorithms[tone];
+                if (algorithm) {
+                    // Apply pattern replacements
+                    algorithm.patterns.forEach(pattern => {
+                        result = result.replace(pattern.from, pattern.to);
+                    });
+
+                    // Apply transforms
+                    if (algorithm.transforms) {
+                        result = algorithm.transforms(result);
+                    }
+
+                    // Add prefixes/suffixes based on creativity level
+                    if (creativity > 60 && algorithm.prefixes) {
+                        const prefix = algorithm.prefixes[Math.floor(Math.random() * algorithm.prefixes.length)];
+                        result = prefix + ' ' + result.toLowerCase();
+                    }
+
+                    if (creativity > 70 && algorithm.suffixes) {
+                        const suffix = algorithm.suffixes[Math.floor(Math.random() * algorithm.suffixes.length)];
+                        result = result + ' ' + suffix;
+                    }
+                }
+
+                // Apply formality adjustments
+                if (formality > 70) {
+                    result = this.increaseFormality(result);
+                } else if (formality < 30) {
+                    result = this.decreaseFormality(result);
+                }
+
+                // Apply conciseness adjustments
+                if (conciseness > 70) {
+                    result = this.makeConcise(result);
+                } else if (conciseness < 30) {
+                    result = this.makeDetailed(result);
+                }
+
+                return result;
+            }
+
+            increaseFormality(text) {
+                return text
+                    .replace(/\bwanna\b/gi, 'want to')
+                    .replace(/\bgonna\b/gi, 'going to')
+                    .replace(/\byeah\b/gi, 'yes')
+                    .replace(/\bokay\b/gi, 'acceptable');
+            }
+
+            decreaseFormality(text) {
+                return text
+                    .replace(/\bwant to\b/gi, 'wanna')
+                    .replace(/\bgoing to\b/gi, 'gonna')
+                    .replace(/\byes\b/gi, 'yeah')
+                    .replace(/\bacceptable\b/gi, 'okay');
+            }
+
+            makeConcise(text) {
+                return text
+                    .replace(/\bin order to\b/gi, 'to')
+                    .replace(/\bdue to the fact that\b/gi, 'because')
+                    .replace(/\bat this point in time\b/gi, 'now')
+                    .replace(/\bfor the purpose of\b/gi, 'for');
+            }
+
+            makeDetailed(text) {
+                return text
+                    .replace(/\bto\b/gi, 'in order to')
+                    .replace(/\bbecause\b/gi, 'due to the fact that')
+                    .replace(/\bnow\b/gi, 'at this point in time');
+            }
+
+            calculateComplexity(text) {
+                const words = text.split(/\s+/).length;
+                const sentences = text.split(/[.!?]+/).length;
+                const avgWordsPerSentence = words / sentences;
+                
+                let complexity = 0;
+                if (this.complexityPatterns.complex.test(text)) complexity += 3;
+                if (this.complexityPatterns.compound.test(text)) complexity += 2;
+                if (avgWordsPerSentence > 15) complexity += 2;
+                if (avgWordsPerSentence > 20) complexity += 3;
+                
+                return Math.min(10, complexity);
+            }
+        }
+
+        // Initialize Application
+        const rewriter = new SentenceRewriter();
+
+        // DOM Elements
+        const elements = {
+            inputText: document.getElementById('inputText'),
+            toneSelector: document.getElementById('toneSelector'),
+            formalitySlider: document.getElementById('formalitySlider'),
+            concisenessSlider: document.getElementById('concisenessSlider'),
+            creativitySlider: document.getElementById('creativitySlider'),
+            formalityValue: document.getElementById('formalityValue'),
+            concisenessValue: document.getElementById('concisenessValue'),
+            creativityValue: document.getElementById('creativityValue'),
+            rewriteBtn: document.getElementById('rewriteBtn'),
+            clearBtn: document.getElementById('clearBtn'),
+            exportBtn: document.getElementById('exportBtn'),
+            analyzeBtn: document.getElementById('analyzeBtn'),
+            resultsContainer: document.getElementById('resultsContainer'),
+            loadingSpinner: document.getElementById('loadingSpinner'),
+            notification: document.getElementById('notification'),
+            wordCount: document.getElementById('wordCount'),
+            charCount: document.getElementById('charCount'),
+            readingTime: document.getElementById('readingTime'),
+            complexityScore: document.getElementById('complexityScore')
+        };
+
+        // Event Listeners
+        function initializeEventListeners() {
+            // Tone selection
+            elements.toneSelector.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tone-button')) {
+                    document.querySelectorAll('.tone-button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    AppState.currentTone = e.target.dataset.tone;
+                    updateToneDescription(AppState.currentTone);
+                }
+            });
+
+            // Slider updates
+            elements.formalitySlider.addEventListener('input', (e) => {
+                AppState.formality = parseInt(e.target.value);
+                elements.formalityValue.textContent = `${AppState.formality}%`;
+            });
+
+            elements.concisenessSlider.addEventListener('input', (e) => {
+                AppState.conciseness = parseInt(e.target.value);
+                elements.concisenessValue.textContent = `${AppState.conciseness}%`;
+            });
+
+            elements.creativitySlider.addEventListener('input', (e) => {
+                AppState.creativity = parseInt(e.target.value);
+                elements.creativityValue.textContent = `${AppState.creativity}%`;
+            });
+
+            // Input text changes
+            elements.inputText.addEventListener('input', updateStatistics);
+
+            // Button actions
+            elements.rewriteBtn.addEventListener('click', performRewrite);
+            elements.clearBtn.addEventListener('click', clearAll);
+            elements.exportBtn.addEventListener('click', exportResults);
+            elements.analyzeBtn.addEventListener('click', analyzeText);
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    performRewrite();
+                }
+                if (e.ctrlKey && e.key === 'r') {
+                    e.preventDefault();
+                    clearAll();
+                }
+            });
+        }
+
+        // Core Functions
+        function updateStatistics() {
+            const text = elements.inputText.value;
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            const chars = text.length;
+            const readingTime = Math.ceil(words / 200 * 60); // 200 WPM average
+            const complexity = text.trim() ? rewriter.calculateComplexity(text) : 0;
+
+            elements.wordCount.textContent = words;
+            elements.charCount.textContent = chars;
+            elements.readingTime.textContent = readingTime;
+            elements.complexityScore.textContent = complexity > 0 ? complexity : '-';
+        }
+
+        function updateToneDescription(tone) {
+            const descriptions = {
+                formal: 'Professional and structured language',
+                friendly: 'Warm and approachable communication',
+                professional: 'Business-appropriate and competent',
+                casual: 'Relaxed and conversational style',
+                academic: 'Scholarly and research-oriented',
+                persuasive: 'Compelling and influential language',
+                empathetic: 'Understanding and supportive tone',
+                confident: 'Assertive and self-assured expression'
+            };
+            
+            showNotification(`Tone set to: ${descriptions[tone]}`, 'info');
+        }
+
+        async function performRewrite() {
+            const inputText = elements.inputText.value.trim();
+            
+            if (!inputText) {
+                showNotification('Please enter a sentence to rewrite.', 'error');
+                return;
+            }
+
+            if (inputText.length > 500) {
+                showNotification('Please limit input to 500 characters for optimal results.', 'error');
+                return;
+            }
+
+            // Show loading state
+            elements.loadingSpinner.style.display = 'block';
+            elements.rewriteBtn.disabled = true;
+
+            try {
+                // Simulate processing time for realism
+                await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+
+                const options = {
+                    formality: AppState.formality,
+                    conciseness: AppState.conciseness,
+                    creativity: AppState.creativity
+                };
+
+                // Generate multiple variations
+                const variations = [];
+                
+                // Primary rewrite with selected tone
+                const primaryResult = rewriter.rewrite(inputText, AppState.currentTone, options);
+                variations.push({
+                    tone: AppState.currentTone,
+                    text: primaryResult,
+                    primary: true
+                });
+
+                // Generate complementary variations
+                const complementaryTones = getComplementaryTones(AppState.currentTone);
+                complementaryTones.forEach(tone => {
+                    const result = rewriter.rewrite(inputText, tone, options);
+                    variations.push({
+                        tone: tone,
+                        text: result,
+                        primary: false
+                    });
+                });
+
+                // Update results
+                displayResults(variations);
+                
+                // Update statistics
+                AppState.statistics.totalRewrites++;
+                AppState.statistics.wordsProcessed += inputText.split(/\s+/).length;
+                
+                showNotification('Sentence rewritten successfully!', 'success');
+
+            } catch (error) {
+                showNotification('An error occurred during rewriting. Please try again.', 'error');
+                console.error('Rewrite error:', error);
+            } finally {
+                elements.loadingSpinner.style.display = 'none';
+                elements.rewriteBtn.disabled = false;
+            }
+        }
+
+        function getComplementaryTones(primaryTone) {
+            const toneGroups = {
+                formal: ['professional', 'academic'],
+                friendly: ['casual', 'empathetic'],
+                professional: ['formal', 'confident'],
+                casual: ['friendly', 'empathetic'],
+                academic: ['formal', 'professional'],
+                persuasive: ['confident', 'professional'],
+                empathetic: ['friendly', 'casual'],
+                confident: ['persuasive', 'professional']
+            };
+            
+            return (toneGroups[primaryTone] || ['formal', 'friendly']).slice(0, 2);
+        }
+
+        function displayResults(variations) {
+            const container = elements.resultsContainer;
+            container.innerHTML = '';
+
+            variations.forEach((variation, index) => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item fade-in';
+                resultItem.style.animationDelay = `${index * 0.1}s`;
+
+                resultItem.innerHTML = `
+                    <div class="result-header">
+                        <div class="result-tone">
+                            ${getToneIcon(variation.tone)} ${variation.tone.charAt(0).toUpperCase() + variation.tone.slice(1)}
+                            ${variation.primary ? '<span style="margin-left: 8px; font-size: 0.75rem; opacity: 0.7;">PRIMARY</span>' : ''}
+                        </div>
+                        <div class="result-actions">
+                            <button class="result-action" onclick="copyToClipboard('${variation.text.replace(/'/g, "\\'")}')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="result-action" onclick="shareResult('${variation.text.replace(/'/g, "\\'")}')">
+                                <i class="fas fa-share"></i>
+                            </button>
+                            <button class="result-action" onclick="analyzeResult('${variation.text.replace(/'/g, "\\'")}')">
+                                <i class="fas fa-chart-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="result-text">${variation.text}</div>
+                `;
+
+                container.appendChild(resultItem);
+            });
+
+            AppState.results = variations;
+        }
+
+        function getToneIcon(tone) {
+            const icons = {
+                formal: '<i class="fas fa-user-tie"></i>',
+                friendly: '<i class="fas fa-smile"></i>',
+                professional: '<i class="fas fa-briefcase"></i>',
+                casual: '<i class="fas fa-coffee"></i>',
+                academic: '<i class="fas fa-graduation-cap"></i>',
+                persuasive: '<i class="fas fa-bullhorn"></i>',
+                empathetic: '<i class="fas fa-heart"></i>',
+                confident: '<i class="fas fa-trophy"></i>'
+            };
+            return icons[tone] || '<i class="fas fa-edit"></i>';
+        }
+
+        function clearAll() {
+            elements.inputText.value = '';
+            elements.resultsContainer.innerHTML = `
+                <div style="text-align: center; color: var(--text-tertiary); padding: 40px;">
+                    <i class="fas fa-lightbulb" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
+                    <p>Your rewritten sentences will appear here</p>
+                </div>
+            `;
+            AppState.results = [];
+            updateStatistics();
+            showNotification('All content cleared.', 'info');
+        }
+
+        function exportResults() {
+            if (AppState.results.length === 0) {
+                showNotification('No results to export. Please rewrite a sentence first.', 'error');
+                return;
+            }
+
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                originalText: elements.inputText.value,
+                settings: {
+                    tone: AppState.currentTone,
+                    formality: AppState.formality,
+                    conciseness: AppState.conciseness,
+                    creativity: AppState.creativity
+                },
+                results: AppState.results,
+                statistics: AppState.statistics
+            };
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
+                type: 'application/json' 
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sentence-rewriter-results-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showNotification('Results exported successfully!', 'success');
+        }
+
+        function analyzeText() {
+            const text = elements.inputText.value.trim();
+            
+            if (!text) {
+                showNotification('Please enter text to analyze.', 'error');
+                return;
+            }
+
+            const analysis = {
+                words: text.split(/\s+/).length,
+                sentences: text.split(/[.!?]+/).filter(s => s.trim()).length,
+                avgWordsPerSentence: 0,
+                complexity: rewriter.calculateComplexity(text),
+                readabilityScore: 0,
+                sentimentScore: 0
+            };
+
+            analysis.avgWordsPerSentence = analysis.words / analysis.sentences;
+            analysis.readabilityScore = calculateReadabilityScore(text);
+            analysis.sentimentScore = calculateSentimentScore(text);
+
+            displayAnalysis(analysis);
+        }
+
+        function calculateReadabilityScore(text) {
+            // Simplified Flesch Reading Ease approximation
+            const words = text.split(/\s+/).length;
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim()).length;
+            const syllables = text.split(/[aeiouAEIOU]/).length - 1;
+            
+            if (sentences === 0 || words === 0) return 0;
+            
+            const score = 206.835 - (1.015 * (words / sentences)) - (84.6 * (syllables / words));
+            return Math.max(0, Math.min(100, Math.round(score)));
+        }
+
+        function calculateSentimentScore(text) {
+            // Simple sentiment analysis based on word patterns
+            const positiveWords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'brilliant', 'outstanding'];
+            const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'disappointing', 'poor', 'inadequate', 'unacceptable'];
+            
+            const words = text.toLowerCase().split(/\s+/);
+            let score = 0;
+            
+            words.forEach(word => {
+                if (positiveWords.includes(word)) score += 1;
+                if (negativeWords.includes(word)) score -= 1;
+            });
+            
+            return score;
+        }
+
+        function displayAnalysis(analysis) {
+            const analysisHtml = `
+                <div class="result-item fade-in" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-left-color: var(--accent-color);">
+                    <div class="result-header">
+                        <div class="result-tone">
+                            <i class="fas fa-chart-bar"></i> Text Analysis
+                        </div>
+                    </div>
+                    <div class="result-text">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.7); border-radius: 8px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">${analysis.words}</div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">Total Words</div>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.7); border-radius: 8px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">${analysis.sentences}</div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">Sentences</div>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.7); border-radius: 8px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">${analysis.avgWordsPerSentence.toFixed(1)}</div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">Avg Words/Sentence</div>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.7); border-radius: 8px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">${analysis.complexity}/10</div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">Complexity</div>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.7); border-radius: 8px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">${analysis.readabilityScore}</div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">Readability Score</div>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.7); border-radius: 8px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: ${analysis.sentimentScore > 0 ? 'var(--success-color)' : analysis.sentimentScore < 0 ? 'var(--error-color)' : 'var(--text-tertiary)'};">${analysis.sentimentScore > 0 ? '+' : ''}${analysis.sentimentScore}</div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">Sentiment</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            elements.resultsContainer.insertAdjacentHTML('afterbegin', analysisHtml);
+            showNotification('Text analysis completed!', 'success');
+        }
+
+        // Utility Functions
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Copied to clipboard!', 'success');
+            }).catch(() => {
+                showNotification('Failed to copy to clipboard.', 'error');
+            });
+        }
+
+        function shareResult(text) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'SentenceForge Pro - Rewritten Text',
+                    text: text
+                });
+            } else {
+                copyToClipboard(text);
+                showNotification('Text copied for sharing!', 'success');
+            }
+        }
+
+        function analyzeResult(text) {
+            elements.inputText.value = text;
+            updateStatistics();
+            analyzeText();
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = elements.notification;
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeEventListeners();
+            updateStatistics();
+            
+            // Add welcome message
+            setTimeout(() => {
+                showNotification('Welcome to SentenceForge Pro! Enter text and select a tone to begin.', 'info');
+            }, 1000);
+
+            // Add keyboard shortcuts info
+            setTimeout(() => {
+                console.log('Keyboard Shortcuts:');
+                console.log('Ctrl + Enter: Rewrite sentence');
+                console.log('Ctrl + R: Clear all');
+            }, 2000);
+        });
+
+        // Advanced Features - Real-time suggestions
+        let suggestionTimeout;
+        elements.inputText.addEventListener('input', () => {
+            clearTimeout(suggestionTimeout);
+            suggestionTimeout = setTimeout(() => {
+                if (elements.inputText.value.trim().length > 10) {
+                    showRealtimeSuggestions();
+                }
+            }, 2000);
+        });
+
+        function showRealtimeSuggestions() {
+            const text = elements.inputText.value.trim();
+            const suggestions = [];
+
+            // Grammar suggestions
+            if (text.includes('there is') || text.includes('there are')) {
+                suggestions.push('Consider using more active voice');
+            }
+            
+            if (text.split(' ').length > 25) {
+                suggestions.push('Consider breaking into shorter sentences');
+            }
+
+            if (suggestions.length > 0 && Math.random() > 0.7) {
+                showNotification(suggestions[0], 'info');
+            }
+        }
+
+        // Performance monitoring
+        const performanceMonitor = {
+            startTime: Date.now(),
+            interactions: 0,
+            
+            trackInteraction() {
+                this.interactions++;
+            }
+        };
+
+        // Track user interactions
+        document.addEventListener('click', () => performanceMonitor.trackInteraction());
+        document.addEventListener('keypress', () => performanceMonitor.trackInteraction());
+    </script>
+</body>
+</html>
